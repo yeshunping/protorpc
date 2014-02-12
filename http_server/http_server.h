@@ -12,6 +12,7 @@ class HttpRequest;
 class HttpResponse;
 class EventLoop;
 
+// TODO(yeshunping) : Refactor http server later, drop libevent
 class HttpServer {
  public:
   HttpServer(EventLoop* event_loop, int listen_port);
@@ -31,8 +32,4 @@ class HttpServer {
   string uri_root_;
   DISALLOW_COPY_AND_ASSIGN(HttpServer);
 };
-
-
-void ShowBindInfo(  struct evhttp_bound_socket *handle);
-
-}
+}  // namespace protorpc
