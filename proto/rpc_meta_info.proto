@@ -1,0 +1,31 @@
+// Copyright 2014. All Rights Reserved.
+// Author: yeshunping@gmail.com (Shunping Ye)
+
+import "protorpc/proto/rpc_option.proto";
+
+option java_package = "com.github.protorpc";
+
+package protorpc;
+
+message RpcMeta {
+  enum MetaType {
+    MetaType_kRequest = 0;
+    MetaType_kResponse = 1;
+  };
+
+  optional Type type = 1;
+  required int64 sequence_id = 2;
+
+  // Field for request type,
+  optional string method = 100;
+  optional int64 timeout = 101;
+
+  // Field for response type,
+  // If the request failed.
+  optional bool failed = 200;
+  // If the request is canceled by client. If it's set, failed must be set too.
+  optional bool canceled = 201;
+  optional int32 error_code = 202;
+  optional string reason = 203;
+  optional CompressType compress_type = 204;
+}

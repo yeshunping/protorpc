@@ -1,0 +1,11 @@
+// Copyright 2014. All Rights Reserved.
+// Author: yeshunping@gmail.com (Shunping Ye)
+
+package protorpc;
+
+enum ErrorCode {
+  ErrorCode_kOk = 0;
+  ErrorCode_kFailParseRequest = 1;
+  ErrorCode_kFailParseResponse = 2;
+  ErrorCode_kRequestTimeOut = 3;
+};

@@ -1,6 +1,9 @@
 // Copyright 2014. All Rights Reserved.
 // Author: yeshunping@gmail.com (Shunping Ye)
 
+#ifndef PROTORPC_HTTP_SERVER_HTTP_SERVER_H_
+#define PROTORPC_HTTP_SERVER_HTTP_SERVER_H_
+
 #include "base/callback.h"
 
 struct evhttp_request;
@@ -16,7 +19,7 @@ class EventLoop;
 class HttpServer {
  public:
   HttpServer(EventLoop* event_loop, int listen_port);
-  ~HttpServer();
+  virtual ~HttpServer();
 
   void SetHttpHandler(const string& path, base::ResultCallback2<bool, HttpRequest*, HttpResponse*>* callback);
   void Start();
@@ -33,3 +36,4 @@ class HttpServer {
   DISALLOW_COPY_AND_ASSIGN(HttpServer);
 };
 }  // namespace protorpc
+#endif  // PROTORPC_HTTP_SERVER_HTTP_SERVER_H_

@@ -173,7 +173,7 @@ static void InnerHandlerCallback(struct evhttp_request * request,
   base::ResultCallback2<bool, HttpRequest*, HttpResponse*>* callback =
       (base::ResultCallback2<bool, HttpRequest*, HttpResponse*>*)cb;
   HttpRequest http_request(request);
-  HttpResponse response;
+  HttpResponse response(&http_request);
   callback->Run(&http_request, &response);
 }
 
