@@ -1,5 +1,5 @@
-// Copyright 2012 Easou Inc. All Rights Reserved.
-// Author: shunping_ye@staff.easou.com (Shunping Ye)
+// Copyright 2014. All Rights Reserved.
+// Author: yeshunping@gmail.com (Shunping Ye)
 
 #include <stdio.h>
 
