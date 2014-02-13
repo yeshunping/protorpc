@@ -7,6 +7,7 @@
 
 #include "base/flags.h"
 #include "base/logging.h"
+#include "base/binary_version.h"
 
 DEFINE_int32(listen_port, 10000, "the address server listen on.");
 
@@ -35,6 +36,7 @@ class EchoServerImpl : public EchoServer {
 }  // end namespace examples
 
 int main(int argc, char** argv) {
+  base::SetupBinaryVersion();
   google::ParseCommandLineFlags(&argc, &argv, true);
 
   protorpc::EventLoop event_loop;

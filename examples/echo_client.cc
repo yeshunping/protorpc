@@ -8,11 +8,13 @@
 
 #include "base/flags.h"
 #include "base/logging.h"
+#include "base/binary_version.h"
 
 DEFINE_string(server_host, "127.0.0.1", "the server host");
 DEFINE_int32(server_port, 10000, "the server port listen on.");
 
 int main(int argc, char** argv) {
+  base::SetupBinaryVersion();
   google::ParseCommandLineFlags(&argc, &argv, true);
 
   protorpc::RpcClient rpc_client;
