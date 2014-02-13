@@ -10,11 +10,13 @@
 #include "base/logging.h"
 #include "base/flags.h"
 #include "base/string_util.h"
+#include "base/stl_util-inl.h"
 #include "protorpc/http_server/event_loop.h"
 #include "protorpc/http_server/debug_util.h"
 #include "protorpc/http_server/http_type.h"
 #include "protorpc/http_server/http_request.h"
 #include "protorpc/http_server/http_response.h"
+#include "protorpc/http_server/http_handler.h"
 #include "thirdparty/event/include/event2/http.h"
 #include "thirdparty/event/include/event2/buffer.h"
 
@@ -40,7 +42,6 @@ void send_document_cb(struct evhttp_request *req, void *arg) {
   struct stat st;
 
   if (evhttp_request_get_command(req) != EVHTTP_REQ_GET) {
-    dump_request_cb(req);
     evhttp_send_reply(req, 200, "OK", NULL);
     return;
   }
@@ -166,19 +167,27 @@ HttpServer::HttpServer(EventLoop* event_loop, int listen_port)
 }
 
 HttpServer::~HttpServer() {
+  base::STLDeleteValues(&handlers_);
 }
 
 static void InnerHandlerCallback(struct evhttp_request * request,
                                  void* cb) {
-  base::ResultCallback2<bool, HttpRequest*, HttpResponse*>* callback =
-      (base::ResultCallback2<bool, HttpRequest*, HttpResponse*>*)cb;
+  HttpHandler* handler = (HttpHandler*)cb;
   HttpRequest http_request(request);
   HttpResponse response(&http_request);
-  callback->Run(&http_request, &response);
+  handler->Handler(&http_request, &response);
 }
 
-void HttpServer::SetHttpHandler(const string& path, base::ResultCallback2<bool, HttpRequest*, HttpResponse*>* callback) {
-  evhttp_set_cb(http_, path.c_str(), InnerHandlerCallback, (void*)callback);
+bool HttpServer::RegisterHttpHandler(const string& path,
+                                     HttpHandler* handler) {
+  hash_map<std::string, HttpHandler*>::const_iterator it = handlers_.find(path);
+  if (it != handlers_.end()) {
+    LOG(ERROR) << "Handler for path :" << path << " exist, fail to register new handler for it";
+    return false;
+  }
+  evhttp_set_cb(http_, path.c_str(), InnerHandlerCallback, (void*)handler);
+  handlers_.insert(make_pair(path, handler));
+  return true;
 }
 
 void HttpServer::Start() {

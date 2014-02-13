@@ -15,6 +15,15 @@ cc_library(
 )
 
 cc_library(
+    name = 'http_handler',
+    srcs = 'http_handler.cc',
+    deps = [':http_request',
+            ':http_response',
+            '//base:base',
+            ],
+)
+
+cc_library(
     name = 'http_request',
     srcs = 'http_request.cc',
     deps = ['//base:base',
@@ -51,6 +60,7 @@ cc_library(
     name = 'http_server',
     srcs = 'http_server.cc',
     deps = [':http_type',
+            ':http_handler',
             ':debug_util',
             ':http_request',
             ':http_response',

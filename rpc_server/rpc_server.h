@@ -13,28 +13,27 @@ namespace protorpc {
 
 class RpcServer : public HttpServer {
  public:
-    RpcServer(const std::string& binary_path,
-              EventLoop* event_loop,
-              int listen_port)
-                    : HttpServer(event_loop, listen_port),
-                      binary_path_(binary_path) {
-        RegisterBuiltinHandlers();
-    }
+  RpcServer(const std::string& binary_path, EventLoop* event_loop,
+            int listen_port)
+      : HttpServer(event_loop, listen_port),
+        binary_path_(binary_path) {
+    RegisterBuiltinHandlers();
+  }
 
-    virtual ~RpcServer() {
-        UnregisterServices();
-    }
+  virtual ~RpcServer() {
+    UnregisterServices();
+  }
 
-    void RegisterService(google::protobuf::Service* service);
+  void RegisterService(google::protobuf::Service* service);
 
  private:
-    void RegisterBuiltinHandlers();
-    void UnregisterServices();
+  void RegisterBuiltinHandlers();
+  void UnregisterServices();
 
-    bool HandleVersionRequest(HttpRequest*, HttpResponse*);
-    bool HandleFlagsRequest(HttpRequest*, HttpResponse*);
+  bool HandleVersionRequest(HttpRequest*, HttpResponse*);
+  bool HandleFlagsRequest(HttpRequest*, HttpResponse*);
 
-    std::string binary_path_;
+  std::string binary_path_;
 };
 
 }  // namespace poppy

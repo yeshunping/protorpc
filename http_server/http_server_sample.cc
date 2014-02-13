@@ -12,6 +12,7 @@
 #include "protorpc/http_server/http_request.h"
 #include "protorpc/http_server/http_response.h"
 #include "protorpc/http_server/http_server.h"
+#include "protorpc/http_server/http_handler.h"
 #include "protorpc/http_server/event_loop.h"
 #include "protorpc/http_server/debug_util.h"
 #include "thirdparty/event/include/event2/http.h"
@@ -21,14 +22,8 @@ DEFINE_int32(listen_port, 10012, "");
 
 static bool DumpRequestCallback(protorpc::HttpRequest* request,
                                 protorpc::HttpResponse* response) {
-  protorpc::dump_request_cb(request->request());
-  struct evbuffer *evb = NULL;
-  evb = evbuffer_new();
-  evbuffer_add_printf(evb, "Dump done!");
-  evhttp_send_reply(request->request(), 200, "OK", evb);
-  if (evb) {
-    evbuffer_free(evb);
-  }
+  protorpc::DumpRequestInfo(request);
+  response->AppendBuffer("Dump done!");
   return true;
 }
 
@@ -38,7 +33,11 @@ int main(int argc, char **argv) {
   protorpc::EventLoop event_loop;
   protorpc::HttpServer http_server(&event_loop, FLAGS_listen_port);
 
-  http_server.SetHttpHandler("/dump", base::NewPermanentCallback(DumpRequestCallback));
+  base::ResultCallback2<bool, protorpc::HttpRequest*, protorpc::HttpResponse*>* callback =
+      base::NewPermanentCallback(DumpRequestCallback);
+  protorpc::DefaultHttpHandler dump_handler(callback);
+  http_server.RegisterHttpHandler("/dump", &dump_handler);
+
   http_server.Start();
   event_loop.Loop();
 

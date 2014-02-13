@@ -4,11 +4,10 @@
 #ifndef PROTORPC_HTTP_SERVER_DEBUG_UTIL_H_
 #define PROTORPC_HTTP_SERVER_DEBUG_UTIL_H_
 
-struct evhttp_request;
-
 namespace protorpc {
+class HttpRequest;
 
-void dump_request_cb(struct evhttp_request *req);
+void DumpRequestInfo(HttpRequest* request);
 
 }
 

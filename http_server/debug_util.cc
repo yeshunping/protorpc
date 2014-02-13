@@ -5,12 +5,14 @@
 
 #include <stdio.h>
 
+#include "protorpc/http_server/http_request.h"
 #include "thirdparty/event/include/event2/buffer.h"
 #include "thirdparty/event/include/event2/http.h"
 #include "thirdparty/event/include/event2/keyvalq_struct.h"
 
 namespace protorpc {
-void dump_request_cb(struct evhttp_request *req) {
+void DumpRequestInfo(HttpRequest* request) {
+  struct evhttp_request *req = request->request();
   const char *cmdtype;
   struct evkeyvalq *headers;
   struct evkeyval *header;

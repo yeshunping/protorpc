@@ -12,6 +12,7 @@
 #include "base/binary_version.h"
 #include "base/string_util.h"
 #include "protorpc/http_server/http_response.h"
+#include "protorpc/http_server/http_handler.h"
 
 namespace protorpc {
 
@@ -22,73 +23,82 @@ static const char kFlagsHttpPath[] = "/flags";
 const char kRpcFormHttpPath[] = "/rpc/form";
 const char kRpcServiceHttpPath[] = "/rpc";
 
-bool RpcServer::HandleVersionRequest(HttpRequest* request, HttpResponse* response) {
+bool RpcServer::HandleVersionRequest(HttpRequest* request,
+                                     HttpResponse* response) {
 //    response->SetHeader("Content-Type", "text/plain");
-    std::string http_body = StringPrintf("<html><head><title>Version Info for %s</title></head>"
-                                         "<body><pre>%s</pre></body></html>",
-                                         binary_path_.c_str(),
-                                         google::VersionString());
-    response->AppendBuffer(http_body);
-    return response->Send();
+  std::string http_body = StringPrintf(
+      "<html><head><title>Version Info for %s</title></head>"
+      "<body><pre>%s</pre></body></html>",
+      binary_path_.c_str(), google::VersionString());
+  response->AppendBuffer(http_body);
+  return true;
 }
 
-bool RpcServer::HandleFlagsRequest(HttpRequest* request, HttpResponse* response) {
-    std::vector<google::CommandLineFlagInfo> flaginfo;
-    GetAllFlags(&flaginfo);
+bool RpcServer::HandleFlagsRequest(HttpRequest* request,
+                                   HttpResponse* response) {
+  std::vector<google::CommandLineFlagInfo> flaginfo;
+  GetAllFlags(&flaginfo);
 
-    //  response->SetHeader("Content-Type", "text/html");
-    std::ostringstream os;
+  //  response->SetHeader("Content-Type", "text/html");
+  std::ostringstream os;
 
-    os << "<html><head><title>FlagsInfo page</title></head><body>\n";
-    std::vector<google::CommandLineFlagInfo>::iterator iter = flaginfo.begin();
-    while (iter != flaginfo.end()) {
-        const std::string& filename = iter->filename;
-        os << "<h4>" << filename << "</h4>";
-        os << "<table border=1>\n";
-        os << "<tr><td><b>name</b></td>\n";
-        os << "<td><b>type</b></td>\n";
-        os << "<td><b>current value</b></td>\n";
-        os << "<td><b>default value</b></td>\n";
-        os << "<td><b>description</b></td>\n";
+  os << "<html><head><title>FlagsInfo page</title></head><body>\n";
+  std::vector<google::CommandLineFlagInfo>::iterator iter = flaginfo.begin();
+  while (iter != flaginfo.end()) {
+    const std::string& filename = iter->filename;
+    os << "<h4>" << filename << "</h4>";
+    os << "<table border=1>\n";
+    os << "<tr><td><b>name</b></td>\n";
+    os << "<td><b>type</b></td>\n";
+    os << "<td><b>current value</b></td>\n";
+    os << "<td><b>default value</b></td>\n";
+    os << "<td><b>description</b></td>\n";
 
-        while ((iter != flaginfo.end()) && (filename == iter->filename)) {
-            if (!iter->is_default) {
-                os << "<tr style=" << "color:red" << ">";
-            } else {
-                os << "<tr>\n";
-            }
-            os << "<td>" << iter->name << "</td>\n";
-            os << "<td>" << iter->type << "</td>\n";
-            os << "<td>" << iter->current_value << "</td>\n";
-            os << "<td>" << iter->default_value << "</td>\n";
-            os << "<td>" << iter->description << "</td>\n";
-            os << "</tr>\n";
-            ++iter;
-        }
-        os << "</table><br />\n";
+    while ((iter != flaginfo.end()) && (filename == iter->filename)) {
+      if (!iter->is_default) {
+        os << "<tr style=" << "color:red" << ">";
+      } else {
+        os << "<tr>\n";
+      }
+      os << "<td>" << iter->name << "</td>\n";
+      os << "<td>" << iter->type << "</td>\n";
+      os << "<td>" << iter->current_value << "</td>\n";
+      os << "<td>" << iter->default_value << "</td>\n";
+      os << "<td>" << iter->description << "</td>\n";
+      os << "</tr>\n";
+      ++iter;
     }
-    os << "</body></html>\n";
-    string response_str(os.str());
-    response->AppendBuffer(response_str);
-    return response->Send();
+    os << "</table><br />\n";
+  }
+  os << "</body></html>\n";
+  string response_str(os.str());
+  response->AppendBuffer(response_str);
+  return true;
 }
 
 void RpcServer::RegisterService(google::protobuf::Service* service) {
-    // TODO(yeshunping) :
+  // TODO(yeshunping) :
 }
 
 void RpcServer::RegisterBuiltinHandlers() {
-    // TODO(yeshunping) : Register rpc handler
-    HttpServer::SetHttpHandler(kVersionHttpPath,
-                               base::NewPermanentCallback(this, &RpcServer::HandleVersionRequest));
+  // TODO(yeshunping) : Register rpc handler
+  {
+    base::ResultCallback2<bool, protorpc::HttpRequest*, protorpc::HttpResponse*>* callback =
+        base::NewPermanentCallback(this, &RpcServer::HandleVersionRequest);
+    DefaultHttpHandler* version_handler = new DefaultHttpHandler(callback);
+    HttpServer::RegisterHttpHandler(kVersionHttpPath, version_handler);
+  }
 
-    HttpServer::SetHttpHandler(kFlagsHttpPath,
-                               base::NewPermanentCallback(this, &RpcServer::HandleFlagsRequest));
-
+  {
+    base::ResultCallback2<bool, protorpc::HttpRequest*, protorpc::HttpResponse*>* callback =
+        base::NewPermanentCallback(this, &RpcServer::HandleFlagsRequest);
+    DefaultHttpHandler* flags_handler = new DefaultHttpHandler(callback);
+    HttpServer::RegisterHttpHandler(kFlagsHttpPath, flags_handler);
+  }
 }
 
 void RpcServer::UnregisterServices() {
-    // TODO(yeshunping) :
+  // TODO(yeshunping) :
 }
 
 }  // namespace poppy

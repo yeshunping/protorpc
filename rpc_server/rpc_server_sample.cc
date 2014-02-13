@@ -21,7 +21,6 @@
 
 DEFINE_int32(listen_port, 10012, "");
 
-
 int main(int argc, char **argv) {
   base::SetupBinaryVersion();
   google::ParseCommandLineFlags(&argc, &argv, false);

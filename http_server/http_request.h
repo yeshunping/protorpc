@@ -4,6 +4,8 @@
 #ifndef PROTORPC_HTTP_SERVER_HTTP_REQUEST_H_
 #define PROTORPC_HTTP_SERVER_HTTP_REQUEST_H_
 
+#include <string>
+
 #include "base/basictypes.h"
 
 struct evhttp_request;
@@ -17,7 +19,7 @@ class HttpRequest {
   struct evhttp_request* request() {
     return request_;
   }
-
+  const std::string Url();
  private:
   struct evhttp_request* request_;
   DISALLOW_COPY_AND_ASSIGN(HttpRequest);
