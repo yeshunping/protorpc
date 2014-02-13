@@ -1,5 +1,5 @@
-// Copyright 2013 Easou Inc. All Rights Reserved.
-// Author: shunping_ye@staff.easou.com (Shunping Ye)
+// Copyright 2013. All Rights Reserved.
+// Author: yeshunping@gmail.com (Shunping Ye)
 
 #include "protorpc/file/simple_line_reader.h"
 #include <string>

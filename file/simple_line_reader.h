@@ -1,5 +1,5 @@
-// Copyright 2013 Easou Inc. All Rights Reserved.
-// Author: shunping_ye@staff.easou.com (Shunping Ye)
+// Copyright 2013. All Rights Reserved.
+// Author: yeshunping@gmail.com (Shunping Ye)
 
 #ifndef FILE_SIMPLE_LINE_READER_H_
 #define FILE_SIMPLE_LINE_READER_H_
