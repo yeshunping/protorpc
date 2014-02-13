@@ -9,8 +9,8 @@
 
 #include "base/flags.h"
 #include "base/logging.h"
-// FIXME(yeshunping) : Generate base/version.h for git
-#include "base/version_string.h"
+#include "base/binary_version.h"
+#include "base/string_util.h"
 #include "protorpc/http_server/http_response.h"
 
 namespace protorpc {
@@ -27,7 +27,7 @@ bool RpcServer::HandleVersionRequest(HttpRequest* request, HttpResponse* respons
     std::string http_body = StringPrintf("<html><head><title>Version Info for %s</title></head>"
                                          "<body><pre>%s</pre></body></html>",
                                          binary_path_.c_str(),
-                                         base::GetVersionString(binary_path_.c_str()).c_str());
+                                         google::VersionString());
     response->AppendBuffer(http_body);
     return response->Send();
 }

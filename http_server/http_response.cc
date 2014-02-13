@@ -25,7 +25,7 @@ void HttpResponse::AppendBuffer(const std::string& buff) {
 
 bool HttpResponse::Send() {
     struct evbuffer *evb = evbuffer_new();
-    evbuffer_add_printf(evb, content_.c_str());
+    evbuffer_add_printf(evb, "%s", content_.c_str());
     evhttp_send_reply(request_->request(), 200, "OK", evb);
     evbuffer_free(evb);
     return true;

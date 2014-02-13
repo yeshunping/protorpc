@@ -9,6 +9,7 @@
 #include "base/logging.h"
 #include "base/callback.h"
 #include "base/flags.h"
+#include "base/binary_version.h"
 #include "protorpc/http_server/http_request.h"
 #include "protorpc/http_server/http_response.h"
 #include "protorpc/http_server/http_server.h"
@@ -22,8 +23,8 @@ DEFINE_int32(listen_port, 10012, "");
 
 
 int main(int argc, char **argv) {
+  base::SetupBinaryVersion();
   google::ParseCommandLineFlags(&argc, &argv, false);
-
   protorpc::EventLoop event_loop;
   protorpc::RpcServer http_server(argv[0], &event_loop, FLAGS_listen_port);
 
