@@ -14,7 +14,6 @@
 #include "protorpc/http_server/http_server.h"
 #include "protorpc/http_server/http_handler.h"
 #include "protorpc/http_server/event_loop.h"
-#include "protorpc/http_server/debug_util.h"
 #include "thirdparty/event/include/event2/http.h"
 #include "thirdparty/event/include/event2/buffer.h"
 
@@ -22,7 +21,7 @@ DEFINE_int32(listen_port, 10012, "");
 
 static bool DumpRequestCallback(protorpc::HttpRequest* request,
                                 protorpc::HttpResponse* response) {
-  protorpc::DumpRequestInfo(request);
+  request->Dump();
   response->AppendBuffer("Dump done!");
   return true;
 }

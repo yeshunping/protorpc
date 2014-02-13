@@ -19,7 +19,7 @@ DEFINE_string(user_agent, "Mozilla/5.0 (Windows NT 6.1; rv:16.0) Gecko/20100101 
 int main(int argc, char** argv) {
   google::ParseCommandLineFlags(&argc, &argv, false);
 
-  util::CurlWrapper curl;
+  protorpc::CurlWrapper curl;
   string data;
   long code = 0;
   curl.SetUserAgent(FLAGS_user_agent);

@@ -6,6 +6,7 @@
 
 #include <string>
 
+#include "base/hash_tables.h"
 #include "protorpc/http_server/http_server.h"
 #include "thirdparty/protobuf/include/google/protobuf/service.h"
 
@@ -13,10 +14,9 @@ namespace protorpc {
 
 class RpcServer : public HttpServer {
  public:
-  RpcServer(const std::string& binary_path, EventLoop* event_loop,
+  RpcServer(EventLoop* event_loop,
             int listen_port)
-      : HttpServer(event_loop, listen_port),
-        binary_path_(binary_path) {
+      : HttpServer(event_loop, listen_port) {
     RegisterBuiltinHandlers();
   }
 
@@ -24,16 +24,23 @@ class RpcServer : public HttpServer {
     UnregisterServices();
   }
 
-  void RegisterService(google::protobuf::Service* service);
+  bool RegisterService(google::protobuf::Service* service);
 
  private:
   void RegisterBuiltinHandlers();
   void UnregisterServices();
 
+  bool GetRpcRequest(HttpRequest* request, google::protobuf::Message* msg);
+  const google::protobuf::MethodDescriptor* GetRpcMethod(const std::string& method_name,
+                                                         google::protobuf::Service* service);
+
+  // TODO(yeshunping) : Support status request, profiler request, Form rpc request, json rpc request.
   bool HandleVersionRequest(HttpRequest*, HttpResponse*);
   bool HandleFlagsRequest(HttpRequest*, HttpResponse*);
+  bool HandleRpcRequest(HttpRequest*, HttpResponse*);
 
-  std::string binary_path_;
+  base::hash_map<std::string, google::protobuf::Service*> services_;
+  DISALLOW_COPY_AND_ASSIGN(RpcServer);
 };
 
 }  // namespace poppy

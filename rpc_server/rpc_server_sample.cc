@@ -14,7 +14,6 @@
 #include "protorpc/http_server/http_response.h"
 #include "protorpc/http_server/http_server.h"
 #include "protorpc/http_server/event_loop.h"
-#include "protorpc/http_server/debug_util.h"
 #include "protorpc/rpc_server/rpc_server.h"
 #include "thirdparty/event/include/event2/http.h"
 #include "thirdparty/event/include/event2/buffer.h"
@@ -25,7 +24,7 @@ int main(int argc, char **argv) {
   base::SetupBinaryVersion();
   google::ParseCommandLineFlags(&argc, &argv, false);
   protorpc::EventLoop event_loop;
-  protorpc::RpcServer http_server(argv[0], &event_loop, FLAGS_listen_port);
+  protorpc::RpcServer http_server(&event_loop, FLAGS_listen_port);
 
   http_server.Start();
   event_loop.Loop();

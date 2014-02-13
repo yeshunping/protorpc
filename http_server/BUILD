@@ -48,20 +48,10 @@ cc_library(
 )
 
 cc_library(
-    name = 'debug_util',
-    srcs = 'debug_util.cc',
-    deps = ['//base:base',
-            '//thirdparty/event:event',
-            ],
-)
-
-
-cc_library(
     name = 'http_server',
     srcs = 'http_server.cc',
     deps = [':http_type',
             ':http_handler',
-            ':debug_util',
             ':http_request',
             ':http_response',
             ':event_loop',

@@ -3,6 +3,24 @@ cc_library(
     srcs = 'rpc_server.cc',
     deps = ['//base:base',
             '//protorpc/http_server:http_server',
+            '//thirdparty/protobuf:protobuf',
+            ],
+)
+
+cc_library(
+    name = 'rpc_channel',
+    srcs = 'rpc_channel.cc',
+    deps = ['//base:base',
+            '//protorpc/rpc_client:rpc_client',
+            '//thirdparty/protobuf:protobuf',
+            ],
+)
+
+cc_library(
+    name = 'rpc_controller',
+    srcs = 'rpc_controller.cc',
+    deps = ['//base:base',
+            '//thirdparty/protobuf:protobuf',
             ],
 )
 

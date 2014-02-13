@@ -12,7 +12,7 @@
 #include "base/basictypes.h"
 #include "thirdparty/curl/curl.h"
 
-namespace util {
+namespace protorpc {
 class CurlWrapper {
  public:
   struct WritePack {

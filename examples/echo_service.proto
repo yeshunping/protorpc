@@ -1,0 +1,23 @@
+// Copyright 2014. All Rights Reserved.
+// Author: yeshunping@gmail.com (Shunping Ye)
+
+import "protorpc/proto/protorpc.proto";
+
+package examples;
+
+option cc_generic_services = true;
+
+message EchoRequest {
+    required string user = 1;
+    required string message = 2;
+}
+
+message EchoResponse {
+    required string user = 1;
+    required string message = 2;
+}
+
+service EchoServer {
+    rpc Echo(EchoRequest) returns(EchoResponse);
+}
+

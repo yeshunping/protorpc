@@ -17,7 +17,7 @@ DEFINE_int32(default_max_page_size, 1024 * 1024 * 2, "");
 DEFINE_int32(default_max_head_size, 1024 * 100, "");
 DEFINE_string(accept_encoding, "gzip, deflate", "");
 
-namespace util {
+namespace protorpc {
 
 size_t WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data) {
   size_t realsize = size * nmemb;

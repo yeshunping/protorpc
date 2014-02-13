@@ -12,7 +12,6 @@
 #include "base/string_util.h"
 #include "base/stl_util-inl.h"
 #include "protorpc/http_server/event_loop.h"
-#include "protorpc/http_server/debug_util.h"
 #include "protorpc/http_server/http_type.h"
 #include "protorpc/http_server/http_request.h"
 #include "protorpc/http_server/http_response.h"

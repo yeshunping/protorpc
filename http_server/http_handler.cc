@@ -10,7 +10,6 @@
 #include "base/logging.h"
 #include "base/flags.h"
 #include "base/string_util.h"
-#include "protorpc/http_server/debug_util.h"
 #include "protorpc/http_server/http_request.h"
 #include "protorpc/http_server/http_response.h"
 
@@ -32,7 +31,7 @@ DefaultHttpHandler::~DefaultHttpHandler() {
 bool DefaultHttpHandler::Handler(HttpRequest* request, HttpResponse* response) {
   VLOG(1) << "receive request:" << request->Url();
   if (FLAGS_v >= 3) {
-    DumpRequestInfo(request);
+    request->Dump();
   }
   if (!callback_->Run(request, response)) {
     LOG(WARNING) << "fail to treat request:" << request->Url();
