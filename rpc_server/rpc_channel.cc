@@ -13,7 +13,6 @@
 namespace protorpc {
 
 // TODO(yeshunping) : Move to header file for both server/client
-static const char kServiceNameHeader[] = "Protorpc_Service_Name";
 static const char kMethodNameHeader[] = "Protorpc_Method_Name";
 const char kRpcServiceHttpPath[] = "/__rpc__";
 
@@ -33,13 +32,12 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
                             const google::protobuf::Message* request,
                             google::protobuf::Message* response,
                             google::protobuf::Closure* done) {
+  VLOG(2) << "CallMethod called, request :\n" << request->DebugString();
   //  Set service name and method name in http header
   client_->SetHttpMethod("POST");
 
   // FIXME(yeshunping) : name or full_name ?
-  string service_name = method->service()->full_name();
   string method_name = method->full_name();
-  client_->AddHeader(kServiceNameHeader, service_name);
   client_->AddHeader(kMethodNameHeader, method_name);
 
   // TODO(yeshunping) : compress request data
@@ -47,7 +45,7 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
   string data = request->SerializeAsString();
   client_->SetPostData(data);
 
-  string url = StringPrintf("http://%s:%d/%s", host_.c_str(), port_, kRpcServiceHttpPath);
+  string url = StringPrintf("http://%s:%d%s", host_.c_str(), port_, kRpcServiceHttpPath);
   string response_data;
   // TODO(yeshunping) : Support asyn mode
   if (!client_->FetchUrl(url, &response_data)) {
@@ -56,9 +54,13 @@ void RpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
     done->Run();
     return;
   }
-
+  long code = 0;
+  client_->GetResponseCode(&code);
+  LOG(INFO) << "request send, response code:" << code;
   // TODO(yeshunping) : Uncompress data,
   response->ParseFromString(response_data);
-  done->Run();
+  if (done) {
+    done->Run();
+  }
 }
 }  // namespace poppy

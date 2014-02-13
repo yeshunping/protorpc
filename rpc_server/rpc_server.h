@@ -11,6 +11,16 @@
 #include "thirdparty/protobuf/include/google/protobuf/service.h"
 
 namespace protorpc {
+class RpcController;
+
+//  NewCallback canonot bind more than two params, so here we wrap these two vars.
+struct RpcData {
+  RpcData(google::protobuf::Message* _request, google::protobuf::Message* _response)
+    : request(_request), response(_response) {
+  }
+  google::protobuf::Message* request;
+  google::protobuf::Message* response;
+};
 
 class RpcServer : public HttpServer {
  public:
@@ -38,6 +48,9 @@ class RpcServer : public HttpServer {
   bool HandleVersionRequest(HttpRequest*, HttpResponse*);
   bool HandleFlagsRequest(HttpRequest*, HttpResponse*);
   bool HandleRpcRequest(HttpRequest*, HttpResponse*);
+
+  void RequestComplete(RpcController* controller,
+                       RpcData* data);
 
   base::hash_map<std::string, google::protobuf::Service*> services_;
   DISALLOW_COPY_AND_ASSIGN(RpcServer);

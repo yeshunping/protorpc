@@ -15,6 +15,7 @@
 #include "protorpc/http_server/http_request.h"
 #include "protorpc/http_server/http_response.h"
 #include "protorpc/http_server/http_handler.h"
+#include "protorpc/rpc_server/rpc_controller.h"
 #include "thirdparty/protobuf/include/google/protobuf/message.h"
 #include "thirdparty/protobuf/include/google/protobuf/message.h"
 #include "thirdparty/protobuf/include/google/protobuf/dynamic_message.h"
@@ -45,7 +46,6 @@ static const char kVersionHttpPath[] = "/version";
 static const char kFlagsHttpPath[] = "/flags";
 const char kRpcServiceHttpPath[] = "/__rpc__";
 
-static const char kServiceNameHeader[] = "Protorpc_Service_Name";
 static const char kMethodNameHeader[] = "Protorpc_Method_Name";
 
 bool RpcServer::HandleVersionRequest(HttpRequest* request,
@@ -115,9 +115,38 @@ bool RpcServer::GetRpcRequest(HttpRequest* request,
   return true;
 }
 
+void RpcServer::RequestComplete(RpcController* controller,
+                                RpcData* data) {
+  // TODO(yeshunping) : Clean some resources here
+  delete data;
+}
+
+inline bool ParseFullMethodName(const std::string& method_full_name,
+                                std::string* service_full_name,
+                                std::string* method_name) {
+  std::string::size_type pos = method_full_name.rfind('.');
+  if (pos == std::string::npos) {
+    // The method full name must have one period at least to separate
+    // service name and method name.
+    return false;
+  }
+
+  *service_full_name = method_full_name.substr(0, pos);
+  *method_name = method_full_name.substr(pos + 1);
+  return true;
+}
+
 bool RpcServer::HandleRpcRequest(HttpRequest* request, HttpResponse* response) {
   //  Get service name for it.
-  string service_name = request->GetHeader(kServiceNameHeader);
+  string full_method_name = request->GetHeader(kMethodNameHeader);
+  VLOG(2) << "receive request for rpc:" << full_method_name;
+  string service_name;
+  string method_name;
+  if (!ParseFullMethodName(full_method_name, &service_name, &method_name)) {
+    // TODO(yeshunping) : Collect error message.
+    return false;
+  }
+
   LOG(INFO) << "server_name:" << service_name;
   base::hash_map<std::string, google::protobuf::Service*>::iterator it = services_.find(service_name);
   if (it == services_.end()) {
@@ -125,18 +154,35 @@ bool RpcServer::HandleRpcRequest(HttpRequest* request, HttpResponse* response) {
     return false;
   }
   google::protobuf::Service* service = it->second;
+  LOG(INFO) << "find service for name:" << service_name;
 
   //  try to call service handler for this Rpc, generate Rpc Response
-  string method_name = request->GetHeader(kMethodNameHeader);
   const MethodDescriptor* method = GetRpcMethod(method_name, service);
+  if (!method) {
+    LOG(ERROR) << "Fail to get method using name:" << method_name;
+    return false;
+  }
 
   google::protobuf::Message* request_obj = service->GetRequestPrototype(method).New();
+  request_obj->ParseFromString(request->GetRequestData());
   google::protobuf::Message* response_obj = service->GetRequestPrototype(method).New();
-  RpcController* controller = NULL;
-  // FIXME(yeshunping) : New callback for it.
-  google::protobuf::Closure* done = NULL;
-  service->CallMethod(method, controller, request_obj, response_obj, done);
-  // TODO(yeshunping) Build Rpc response into http response, then send back.
+
+  RpcController* controller = new RpcController();
+  google::protobuf::Closure* callback = google::protobuf::NewCallback(this, &RpcServer::RequestComplete,
+                                                                      controller,
+                                                                      new RpcData(request_obj, request_obj));
+  VLOG(2) << "call rpc method, request:\n" << request_obj->DebugString();
+
+  // TODO(yeshunping) : Improve logic here
+  service->CallMethod(method, controller, request_obj, response_obj, callback);
+  string response_data = response_obj->SerializeAsString();
+  response->AppendBuffer(response_data);
+  response->Send();
+
+  delete controller;
+  delete request_obj;
+  delete response_obj;
+
   return true;
 }
 
@@ -172,7 +218,7 @@ void RpcServer::RegisterBuiltinHandlers() {
     base::ResultCallback2<bool, protorpc::HttpRequest*, protorpc::HttpResponse*>* callback =
         base::NewPermanentCallback(this, &RpcServer::HandleRpcRequest);
     DefaultHttpHandler* rpc_handler = new DefaultHttpHandler(callback);
-    HttpServer::RegisterHttpHandler(kFlagsHttpPath, rpc_handler);
+    HttpServer::RegisterHttpHandler(kRpcServiceHttpPath, rpc_handler);
   }
 }
 
